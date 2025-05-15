@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressText = document.getElementById('progressText');
 
     const themeToggle = document.getElementById('themeToggle');
-    const themeIconContainer = document.getElementById('themeIconContainer');
+    const themeIconContainer = document.getElementById('themeIconContainer'); // Crucial for SVG injection
     const helpButton = document.getElementById('helpButton');
     const helpModal = document.getElementById('helpModal');
     const closeHelpModal = document.getElementById('closeHelpModal');
@@ -42,17 +42,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-    // --- Theme Handling ---
+    // --- Theme Handling (Incorporating script_js_theme_update) ---
     const sunIconSVG = `<svg id="themeIconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 .07V2c0 .55.45 1 1 1s1-.45 1-1V.07c0-.55-.45-.97-1-.97s-1 .42-1 .97zm0 21.86V22c0 .55.45 1 1 1s1-.45 1-1v-2.07c0-.55-.45-.97-1-.97s-1 .42-1 .97zM5.99 4.58c-.39-.39-1.02-.39-1.41 0L3.17 6c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L6 5.99c.39-.39.39-1.02 0-1.41zm13.42 13.42c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41zM20.83 6c-.39-.39-1.02-.39-1.41 0l-1.41-1.41c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l1.41 1.41c.39.39.39-1.02 0-1.41zM4.58 19.42c-.39-.39-1.02-.39-1.41 0L1.76 20.83c-.39.39-.39 1.02 0 1.41s1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41z"/></svg>`;
     const moonIconSVG = `<svg id="themeIconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>`;
 
     function applyTheme(theme) {
         document.body.className = theme; // Applies 'light-theme' or 'dark-theme'
         localStorage.setItem('theme', theme);
-        // Dynamically set the icon inside the container
-        if (themeIconContainer) {
-            themeIconContainer.innerHTML = theme === 'dark-theme' ? sunIconSVG : moonIconSVG;
+
+        // Dynamically set the SVG icon inside the container
+        if (themeIconContainer) { // Check if the container element exists
+            if (theme === 'dark-theme') {
+                themeIconContainer.innerHTML = sunIconSVG;
+                if (themeToggle) { // Update aria-label and title if themeToggle exists
+                    themeToggle.setAttribute('aria-label', 'Switch to Light Mode');
+                    themeToggle.setAttribute('title', 'Switch to Light Mode');
+                }
+            } else {
+                themeIconContainer.innerHTML = moonIconSVG;
+                if (themeToggle) {
+                    themeToggle.setAttribute('aria-label', 'Switch to Dark Mode');
+                    themeToggle.setAttribute('title', 'Switch to Dark Mode');
+                }
+            }
+        } else if (themeToggle) {
+            console.warn("themeIconContainer not found. SVG icons might not display correctly. Consider using emojis directly on the button.");
         }
     }
 
@@ -62,8 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
             applyTheme(newTheme);
         });
     }
+
     const savedTheme = localStorage.getItem('theme') || 'light-theme'; // Default to light
     applyTheme(savedTheme);
+    // --- End of Theme Handling section from script_js_theme_update ---
 
 
     // --- File Handling ---
@@ -78,10 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
             dropZone.classList.remove('dragover');
             handleFiles(e.dataTransfer.files);
         });
-         // Allow click on dropzone to trigger file input
+
         dropZone.addEventListener('click', (e) => {
-            if (e.target.id === 'dropZone' || e.target.closest('.drop-zone p') || e.target.closest('.upload-icon')) {
-                imageUpload.click();
+            // If the click target is a label for 'imageUpload' or 'cameraUpload', let its default action proceed.
+            if (e.target.tagName === 'LABEL' && (e.target.htmlFor === 'imageUpload' || e.target.htmlFor === 'cameraUpload')) {
+                return;
+            }
+            // Prevent triggering file input if a button/interactive element within dropzone is clicked
+            if (e.target.closest('button') || e.target.closest('select') || e.target.closest('input:not([type="file"])')) {
+                return;
+            }
+            // For other parts of the dropZone, programmatically click the hidden 'imageUpload' input.
+            if (e.target === dropZone || e.target.parentNode === dropZone || e.target.classList.contains('upload-icon') || e.target.closest('.drop-zone p')) {
+                 if (imageUpload) imageUpload.click();
             }
         });
     }
@@ -89,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cameraUpload) cameraUpload.addEventListener('change', (e) => handleFiles(e.target.files));
 
     async function handleFiles(files) {
-        if (!files) return;
+        if (!files || files.length === 0) return;
         for (const file of files) {
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
                 showToast(`Unsupported file type: ${file.name}`, 'error');
@@ -100,14 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
-            let processedFileObject = file; // Keep original file object for metadata like name
+            let processedFileObject = file;
             let dataURL;
 
             if (file.type === 'image/webp') {
                 try {
-                    const conversionResult = await convertWebPToImage(file, 'image/png');
+                    const conversionResult = await convertWebPToImage(file, 'image/png'); // Convert WebP to PNG
                     dataURL = conversionResult.dataURL;
-                    // Note: processedFileObject retains original WebP name, size. This is fine.
                 } catch (error) {
                     showToast(`Error converting WebP: ${file.name}`, 'error');
                     console.error("WebP Conversion Error:", error);
@@ -120,9 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileId = Date.now().toString() + Math.random().toString(36).substring(2);
             uploadedFiles.push({ file: processedFileObject, dataURL, id: fileId, originalName: file.name });
         }
-        imageUpload.value = ''; // Reset file input to allow selecting the same file again
+        // Reset file input values to allow selecting the same file(s) again if needed
+        if(imageUpload) imageUpload.value = '';
         if (cameraUpload) cameraUpload.value = '';
-
 
         renderPreviews();
         updateUIState();
@@ -151,10 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dataURL = canvas.toDataURL(outputFormat, 0.9); // 0.9 quality for PNG/JPEG
                     resolve({ dataURL });
                 };
-                img.onerror = (e) => reject(new Error("Image could not be loaded for WebP conversion: " + e));
+                img.onerror = (e) => reject(new Error("Image could not be loaded for WebP conversion. " + e.type));
                 img.src = event.target.result;
             };
-            reader.onerror = (e) => reject(new Error("FileReader error during WebP conversion: " + e));
+            reader.onerror = (e) => reject(new Error("FileReader error during WebP conversion. " + e.type));
             reader.readAsDataURL(webpFile);
         });
     }
@@ -162,19 +186,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Image Previews & Reordering ---
     function renderPreviews() {
         if (!imagePreviewContainer) return;
-        imagePreviewContainer.innerHTML = '';
+        imagePreviewContainer.innerHTML = ''; // Clear existing previews
         if (uploadedFiles.length === 0) {
             if (noImagesText) {
-                 imagePreviewContainer.appendChild(noImagesText);
-                 noImagesText.style.display = 'block';
+                 imagePreviewContainer.appendChild(noImagesText); // Add the "empty state" paragraph
+                 noImagesText.style.display = 'block'; // Make it visible
             }
         } else {
-            if (noImagesText) noImagesText.style.display = 'none';
+            if (noImagesText) noImagesText.style.display = 'none'; // Hide if there are images
 
             uploadedFiles.forEach((fileData) => {
                 const item = document.createElement('div');
                 item.className = 'preview-item';
-                item.dataset.id = fileData.id;
+                item.dataset.id = fileData.id; // Use the unique ID for reordering
 
                 const img = document.createElement('img');
                 img.src = fileData.dataURL;
@@ -182,18 +206,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'remove-btn';
-                removeBtn.innerHTML = '&times;';
+                removeBtn.innerHTML = '&times;'; // 'x' symbol
                 removeBtn.title = 'Remove Image';
                 removeBtn.onclick = (e) => {
-                    e.stopPropagation(); // Prevent SortableJS interference if any
+                    e.stopPropagation(); // Prevent SortableJS interference or other parent clicks
                     removeImage(fileData.id);
                 };
 
                 const fileNameSpan = document.createElement('span');
                 fileNameSpan.className = 'file-name';
+                // Truncate long file names for display
                 const displayName = fileData.originalName.length > 18 ? fileData.originalName.substring(0,15) + '...' : fileData.originalName;
                 fileNameSpan.textContent = displayName;
-                fileNameSpan.title = fileData.originalName;
+                fileNameSpan.title = fileData.originalName; // Show full name on hover
 
 
                 item.appendChild(img);
@@ -202,23 +227,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 imagePreviewContainer.appendChild(item);
             });
         }
+        // Update the image count display
         if (imageCountDisplay) {
             imageCountDisplay.textContent = `(${uploadedFiles.length} image${uploadedFiles.length !== 1 ? 's' : ''})`;
         }
     }
 
-    if (imagePreviewContainer) {
+    if (imagePreviewContainer) { // Ensure SortableJS is initialized only if the container exists
         new Sortable(imagePreviewContainer, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            draggable: '.preview-item', // Ensure only preview items are draggable
+            animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
+            ghostClass: 'sortable-ghost', // Class name for the drop placeholder
+            chosenClass: 'sortable-chosen', // Class name for the chosen item
+            draggable: '.preview-item', // Specifies which items inside the element should be draggable
             onEnd: (evt) => {
+                // Reorder the uploadedFiles array based on the new DOM order
                 const newOrder = Array.from(imagePreviewContainer.children)
                                     .map(item => item.dataset.id)
-                                    .filter(id => id);
+                                    .filter(id => id); // Filter out undefined if noImagesText was somehow included
                 uploadedFiles.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
-                // No need to re-render previews, SortableJS handles DOM. Array is now in sync.
+                // No need to call renderPreviews() again, SortableJS updates the DOM.
+                // The uploadedFiles array is now in sync with the visual order.
             }
         });
     }
@@ -226,21 +254,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function removeImage(id) {
         uploadedFiles = uploadedFiles.filter(f => f.id !== id);
-        renderPreviews();
-        updateUIState();
+        renderPreviews(); // Re-render to update the display
+        updateUIState(); // Update button states, etc.
     }
 
     // --- UI State Management ---
     function updateUIState() {
         if (convertToPdfButton) convertToPdfButton.disabled = uploadedFiles.length === 0;
-        if (downloadPdfButton) downloadPdfButton.style.display = 'none';
+        if (downloadPdfButton) downloadPdfButton.style.display = 'none'; // Hide download until PDF is made
 
+        // Set default PDF filename if images are present and filename is empty
         if (fileNameInput) {
             if (uploadedFiles.length > 0 && !fileNameInput.value.trim()) {
                 const now = new Date();
-                fileNameInput.value = `photos_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}.pdf`;
+                // Format: photos_YYYY-MM-DD_HH-MM
+                fileNameInput.value = `photos_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
             } else if (uploadedFiles.length === 0) {
-                fileNameInput.value = '';
+                fileNameInput.value = ''; // Clear filename if no images
             }
         }
     }
@@ -258,25 +288,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (progressBar) progressBar.style.width = '0%';
             if (progressText) progressText.textContent = '0%';
 
+            // Construct filename, ensuring .pdf extension
+            let pdfFileName = fileNameInput.value.trim() || `photos_${new Date().toISOString().slice(0,16).replace(/[-T:]/g, '')}`;
+            if (!pdfFileName.toLowerCase().endsWith('.pdf')) {
+                pdfFileName += '.pdf';
+            }
+
             const options = {
                 orientation: pageOrientationSelect.value,
                 pageSize: pageSizeSelect.value,
                 layout: imageLayoutSelect.value,
-                compression: compressionLevelSelect.value,
+                compression: compressionLevelSelect.value, // For jsPDF's addImage compression
                 watermark: watermarkTextInput.value.trim(),
                 pageNumbers: showPageNumbersSelect.value === 'yes',
-                fileName: (fileNameInput.value.trim() || `photos_${new Date().toISOString().slice(0,16).replace(/[-T:]/g, '')}`) + '.pdf'
+                fileName: pdfFileName
             };
-            // Ensure .pdf extension is only added if not present
-             if (!options.fileName.toLowerCase().endsWith('.pdf')) {
-                options.fileName += '.pdf';
-            }
 
 
             try {
                 const pdf = new jsPDF({
                     orientation: options.orientation,
-                    unit: 'pt',
+                    unit: 'pt', // Using points for easier calculations
                     format: options.pageSize
                 });
 
@@ -286,16 +318,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (options.layout === 'grid3x3') imagesPerPage = 9;
 
                 for (let i = 0; i < totalImages; i += imagesPerPage) {
-                    if (i > 0) pdf.addPage(options.pageSize, options.orientation); // Ensure new page has correct settings
+                    // Add new page for subsequent sets of images
+                    if (i > 0) pdf.addPage(options.pageSize, options.orientation); // Ensure new page respects orientation & size
 
                     const pageImages = uploadedFiles.slice(i, i + imagesPerPage);
-                    const currentProgressText = `Processing page ${Math.floor(i / imagesPerPage) + 1}...`;
-                     if (progressText) progressText.textContent = currentProgressText;
+                    if (progressText) progressText.textContent = `Processing page ${Math.floor(i / imagesPerPage) + 1}...`;
 
 
                     if (options.layout === 'one') {
                         await addImageToPage(pdf, pageImages[0].dataURL, options.compression, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
-                    } else {
+                    } else { // Grid layout
                         const pageWidth = pdf.internal.pageSize.getWidth();
                         const pageHeight = pdf.internal.pageSize.getHeight();
                         const cols = options.layout === 'grid2x2' ? 2 : 3;
@@ -312,24 +344,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     
+                    // Add watermark and page number to the current page
                     if (options.watermark) addWatermark(pdf, options.watermark);
                     if (options.pageNumbers) addPageNumber(pdf, pdf.internal.getNumberOfPages());
 
+                    // Update progress bar
                     const progress = Math.min(100, Math.round(((i + pageImages.length) / totalImages) * 100));
                     if (progressBar) progressBar.style.width = `${progress}%`;
-                    if (progressText && progress === 100) progressText.textContent = `Finalizing...`;
-                    else if (progressText) progressText.textContent = `${progress}%`;
-
+                    if (progressText) progressText.textContent = progress === 100 ? `Finalizing...` : `${progress}%`; // Update text
                 }
                 
-                // Use `output('blob')` for better compatibility with `createObjectURL`
+                // Generate PDF and create download link
                 const pdfBlob = pdf.output('blob');
                 const pdfUrl = URL.createObjectURL(pdfBlob);
 
                 if (downloadPdfButton) {
                     downloadPdfButton.href = pdfUrl;
                     downloadPdfButton.download = options.fileName;
-                    downloadPdfButton.style.display = 'inline-flex';
+                    downloadPdfButton.style.display = 'inline-flex'; // Show download button
                 }
                 showToast('PDF Generated Successfully!', 'success');
                 triggerConfetti();
@@ -338,8 +370,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("PDF Generation Error:", error);
                 showToast(`Error generating PDF: ${error.message || 'Unknown error'}`, 'error');
             } finally {
-                convertToPdfButton.disabled = false;
-                setTimeout(() => {
+                convertToPdfButton.disabled = false; // Re-enable convert button
+                setTimeout(() => { // Hide progress bar after a delay
                      if (progressBarContainer) progressBarContainer.style.display = 'none';
                 }, 2000);
             }
@@ -353,73 +385,116 @@ document.addEventListener('DOMContentLoaded', () => {
                 const aspectRatio = img.width / img.height;
                 let imgWidth, imgHeight;
     
-                const padding = isGridCell ? 5 : 20; // Points
-                const effContainerWidth = containerWidth - (isGridCell ? 2 * padding : 2 * padding); // Padding on both sides for grid cell
-                const effContainerHeight = containerHeight - (isGridCell ? 2 * padding : 2 * padding); // Padding on top/bottom for grid cell
+                const padding = isGridCell ? 5 : 20; // Points for padding inside cell/page
+                // Effective container dimensions after padding
+                const effContainerWidth = containerWidth - (isGridCell ? 1.5 * padding : 2 * padding); // Adjusted padding for grid cells
+                const effContainerHeight = containerHeight - (isGridCell ? 1.5 * padding : 2 * padding);
 
-                if (effContainerWidth / aspectRatio <= effContainerHeight) {
-                    imgWidth = Math.max(1, effContainerWidth); // Ensure width is at least 1
-                    imgHeight = Math.max(1, imgWidth / aspectRatio);
-                } else {
-                    imgHeight = Math.max(1, effContainerHeight); // Ensure height is at least 1
-                    imgWidth = Math.max(1, imgHeight * aspectRatio);
-                }
-                
-                // Ensure dimensions are positive
-                if (imgWidth <= 0 || imgHeight <= 0) {
-                    console.warn("Calculated image dimensions are zero or negative. Skipping image.", {imgWidth, imgHeight, containerWidth, containerHeight});
-                    resolve(); // Resolve to continue with other images
+
+                // Check for valid dimensions before calculation
+                if (effContainerWidth <=0 || effContainerHeight <=0) {
+                     console.warn("Effective container dimensions for image are zero or negative. Skipping image placement.", {effContainerWidth, effContainerHeight});
+                    resolve(); // Resolve to continue with other images/operations
                     return;
                 }
 
+                // Calculate image dimensions to fit container while maintaining aspect ratio
+                if (effContainerWidth / aspectRatio <= effContainerHeight) { // Width is the limiting factor
+                    imgWidth = effContainerWidth;
+                    imgHeight = imgWidth / aspectRatio;
+                } else { // Height is the limiting factor
+                    imgHeight = effContainerHeight;
+                    imgWidth = imgHeight * aspectRatio;
+                }
+                
+                // Ensure calculated dimensions are positive
+                if (imgWidth <= 0 || imgHeight <= 0) {
+                    console.warn("Calculated image dimensions are zero or negative. Skipping image.", {imgWidth, imgHeight});
+                    resolve(); // Resolve to continue
+                    return;
+                }
+
+                // Center image within its allocated space (cell or page)
                 const x = offsetX + (containerWidth - imgWidth) / 2;
                 const y = offsetY + (containerHeight - imgHeight) / 2;
     
-                let imageType = 'JPEG';
+                // Determine image type for addImage (jsPDF supports JPEG, PNG)
+                let imageType = 'JPEG'; // Default
                 if (imageDataUrl.startsWith('data:image/png')) {
                     imageType = 'PNG';
                 }
                 // WebP has already been converted to PNG or JPEG at the `handleFiles` stage.
-                // The `compressionType` is for jsPDF's addImage compression option (mostly for JPEGs)
+
                 pdf.addImage(imageDataUrl, imageType, x, y, imgWidth, imgHeight, undefined, compressionType);
                 resolve();
             };
             img.onerror = (e) => {
-                console.error("Image could not be loaded into Image object:", e, imageDataUrl.substring(0,100));
-                reject(new Error("Failed to load image for PDF conversion"));
+                console.error("Image could not be loaded into Image object for PDF:", e, imageDataUrl.substring(0,100));
+                reject(new Error("Failed to load image for PDF page.")); // Reject the promise on error
             }
             img.src = imageDataUrl;
         });
     }
 
+    // CORRECTED addWatermark: Uses opaque light grey, no problematic GState calls.
     function addWatermark(pdf, text) {
+        if (!text || text.trim() === "") return;
+
         const FONT_SIZE_WATERMARK = 48;
+        // Save current text state
+        const originalFontSize = pdf.getFontSize();
+        const originalTextColorHex = pdf.getTextColor(); // Returns hex e.g., "000000"
+
         pdf.setFontSize(FONT_SIZE_WATERMARK);
-        pdf.setTextColor(200, 200, 200);
-        const currentOpacity = pdf.internal.gStates[pdf.internal.gStatesCurrent].opacity; // Save current opacity
-        pdf.setGState(new pdf.GState({opacity: 0.3})); // Apply transparency for watermark
+        // Use an opaque, very light grey color for the watermark
+        pdf.setTextColor(220, 220, 220); // R, G, B for very light grey
 
-
-        const textDimensions = pdf.getTextDimensions(text, {fontSize: FONT_SIZE_WATERMARK});
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
-
+        // Draw text
         pdf.text(text, pageWidth / 2, pageHeight / 2, { angle: -45, align: 'center', baseline: 'middle' });
-        pdf.setGState(new pdf.GState({opacity: currentOpacity})); // Restore original opacity
-        pdf.setTextColor(0, 0, 0); // Reset text color to black (or theme default if tracked)
+
+        // Restore previous text settings
+        pdf.setFontSize(originalFontSize);
+        if (originalTextColorHex && originalTextColorHex.length === 6) {
+            const r = parseInt(originalTextColorHex.substring(0, 2), 16);
+            const g = parseInt(originalTextColorHex.substring(2, 4), 16);
+            const b = parseInt(originalTextColorHex.substring(4, 6), 16);
+            pdf.setTextColor(r, g, b);
+        } else {
+            pdf.setTextColor(0, 0, 0); // Default to black if previous color couldn't be parsed
+        }
     }
 
+    // CORRECTED addPageNumber: Ensures it's opaque and restores state.
     function addPageNumber(pdf, pageNum) {
         const FONT_SIZE_PAGENUM = 10;
-        const totalPages = pdf.internal.getNumberOfPages();
+        const totalPages = pdf.internal.getNumberOfPages(); // Get total pages for "Page X of Y"
+
+        // Save current text state
+        const originalFontSize = pdf.getFontSize();
+        const originalTextColorHex = pdf.getTextColor();
+
         pdf.setFontSize(FONT_SIZE_PAGENUM);
-        pdf.setTextColor(100, 100, 100);
+        pdf.setTextColor(128, 128, 128); // Medium grey for page number (opaque)
+
         const text = `Page ${pageNum} of ${totalPages}`;
-        const textWidth = pdf.getStringUnitWidth(text) * FONT_SIZE_PAGENUM / pdf.internal.scaleFactor;
+        // Calculate text width using current font settings in PDF
+        const textWidth = pdf.getStringUnitWidth(text) * pdf.getFontSize() / pdf.internal.scaleFactor;
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
-        pdf.text(text, pageWidth - textWidth - 20, pageHeight - 15);
-        pdf.setTextColor(0,0,0); // Reset text color
+        pdf.text(text, pageWidth - textWidth - 20, pageHeight - 15); // Position bottom right
+
+        // Restore previous text settings
+        pdf.setFontSize(originalFontSize);
+        if (originalTextColorHex && originalTextColorHex.length === 6) {
+            const r = parseInt(originalTextColorHex.substring(0, 2), 16);
+            const g = parseInt(originalTextColorHex.substring(2, 4), 16);
+            const b = parseInt(originalTextColorHex.substring(4, 6), 16);
+            pdf.setTextColor(r, g, b);
+        } else {
+            pdf.setTextColor(0, 0, 0); // Default to black
+        }
     }
 
 
@@ -456,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 particleCount: 150,
                 spread: 90,
                 origin: { y: 0.6 },
-                zIndex: 9999 // Ensure it's above other elements
+                zIndex: 10000 // Ensure high z-index, above modals etc.
             });
         }
     }
@@ -472,5 +547,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial UI Update ---
     updateUIState();
-    renderPreviews();
+    renderPreviews(); // Show "No images" text initially if needed
 });
