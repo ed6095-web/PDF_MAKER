@@ -1,0 +1,635 @@
+/* --- Globals, Variables, Base Styles --- */
+:root {
+    --primary-color: #4A90E2;
+    --primary-dark: #357ABD;
+    --secondary-color: #50E3C2;
+    --secondary-dark: #38A89D;
+    --accent-color: #F5A623;
+    --text-color-light: #333;
+    --text-color-dark: #f0f0f0;
+    --bg-color-light: #f4f7f6;
+    --bg-color-dark: #1e1e2f; /* Darker blueish grey */
+    --card-bg-light: #ffffff;
+    --card-bg-dark: #2a2a3c; /* Slightly lighter than body bg */
+    --border-color-light: #e0e0e0;
+    --border-color-dark: #40405f;
+    --font-primary: 'Poppins', sans-serif;
+    --font-cursive: 'Pacifico', cursive;
+    --gradient-main: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    --gradient-dark: linear-gradient(135deg, var(--primary-dark), #1a1a2e); /* Dark theme gradient */
+
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+    --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.dark-theme {
+    --text-color-light: #f0f0f0; /* In dark theme, "light text" is the main text color */
+    --text-color-dark: #333333;  /* "dark text" could be for elements on light backgrounds if any */
+    --bg-color-light: #1e1e2f;
+    --card-bg-light: #2a2a3c;
+    --border-color-light: #40405f;
+    /* Specific dark theme overrides */
+    --primary-color: #58a6ff; /* Lighter blue for dark mode */
+    --primary-dark: #388bfd;
+    --secondary-color: #3ddc84; /* Lighter green */
+    --gradient-main: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--bg-color-light);
+    color: var(--text-color-light);
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+h1, h2 {
+    color: var(--primary-color);
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+
+/* --- Header --- */
+.app-header {
+    background: var(--gradient-main);
+    color: white;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+}
+.dark-theme .app-header {
+    background: var(--gradient-dark);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+.logo-img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.2);
+    padding: 5px;
+}
+.app-header h1 {
+    font-size: 1.8em;
+    color: white;
+    margin: 0;
+}
+
+.header-actions .icon-button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.5em; /* For SVG sizing if not explicit */
+    padding: 8px;
+    margin-left: 10px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+.header-actions .icon-button svg {
+    display: block; /* Prevents extra space below SVG */
+}
+
+.header-actions .icon-button:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* --- Card Style --- */
+.card {
+    background-color: var(--card-bg-light);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: var(--shadow-md);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.section-title {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+    display: inline-block;
+}
+
+
+/* --- Upload Section --- */
+.upload-section .drop-zone {
+    border: 3px dashed var(--primary-color);
+    border-radius: 10px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: var(--bg-color-light); /* Slightly different from card for depth */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+}
+.dark-theme .upload-section .drop-zone {
+     background-color: var(--card-bg-dark); /* Match card for less contrast */
+     border-color: var(--primary-dark);
+}
+
+.upload-section .drop-zone.dragover {
+    background-color: var(--secondary-color);
+    border-color: var(--primary-dark);
+    opacity: 0.8;
+}
+.dark-theme .upload-section .drop-zone.dragover {
+    background-color: var(--secondary-dark);
+}
+.upload-section .upload-icon {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+.upload-section p {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+.upload-section .browse-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.upload-section .upload-limits {
+    font-size: 0.9em;
+    color: #777;
+}
+.dark-theme .upload-section .upload-limits {
+    color: #aaa;
+}
+.camera-button {
+    margin-top: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- Image Preview --- */
+.image-preview-section .section-title span {
+    font-size: 0.8em;
+    font-weight: 400;
+    color: #666;
+}
+.dark-theme .image-preview-section .section-title span {
+    color: #bbb;
+}
+.image-preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 20px;
+    padding: 15px;
+    min-height: 150px; /* Placeholder height */
+    background-color: rgba(0,0,0,0.02);
+    border-radius: 8px;
+    border: 1px solid var(--border-color-light);
+}
+.dark-theme .image-preview-container {
+    background-color: rgba(255,255,255,0.05);
+}
+.preview-item {
+    position: relative;
+    border: 1px solid var(--border-color-light);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: grab;
+    background-color: var(--card-bg-light);
+    aspect-ratio: 1 / 1; /* Ensure square-ish items */
+}
+.preview-item:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: var(--shadow-md);
+}
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.preview-item .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 24px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 10;
+}
+.preview-item:hover .remove-btn {
+    opacity: 1;
+}
+.preview-item .remove-btn:hover {
+    background-color: #dc3545;
+}
+.preview-item .file-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.6);
+    color: white;
+    font-size: 0.75em;
+    padding: 3px 5px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.empty-state {
+    grid-column: 1 / -1; /* Span all columns if grid is empty */
+    text-align: center;
+    padding: 30px;
+    color: #777;
+    font-style: italic;
+}
+.dark-theme .empty-state {
+    color: #aaa;
+}
+/* SortableJS dragging styles */
+.sortable-ghost {
+  opacity: 0.4;
+  background: var(--secondary-color);
+  border: 2px dashed var(--primary-color);
+}
+.sortable-chosen {
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.05);
+}
+
+/* --- Options Section --- */
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color-light);
+}
+.form-control {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color-light);
+    border-radius: 6px;
+    background-color: var(--bg-color-light);
+    color: var(--text-color-light);
+    font-family: var(--font-primary);
+    font-size: 1em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dark-theme .form-control {
+    background-color: var(--card-bg-dark); /* Input bg slightly different from card for visibility */
+    border-color: #555;
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb, 74, 144, 226), 0.25); /* Needs --primary-color-rgb */
+}
+.dark-theme .form-control:focus {
+    border-color: var(--primary-color); /* Use the dark theme primary color */
+}
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* --- Action Section & Buttons --- */
+.action-section {
+    text-align: center;
+    margin-top: 30px;
+}
+.button-primary, .button-secondary {
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none; /* For <a> tags styled as buttons */
+}
+.button-primary {
+    background: var(--gradient-main);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+.dark-theme .button-primary {
+    background: var(--gradient-dark);
+}
+.button-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    filter: brightness(1.1);
+}
+.button-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.dark-theme .button-primary:disabled {
+    background: #555;
+}
+
+.button-secondary {
+    background-color: var(--card-bg-light);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+.dark-theme .button-secondary {
+    background-color: var(--card-bg-dark);
+    color: var(--primary-color); /* Use dark theme primary */
+    border-color: var(--primary-color);
+}
+
+.button-secondary:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.dark-theme .button-secondary:hover:not(:disabled) {
+    background-color: var(--primary-color); /* Dark theme primary */
+    color: var(--text-color-dark); /* Text color on primary bg for dark theme */
+}
+
+.convert-button {
+    min-width: 200px;
+}
+.download-button {
+    margin-left: 15px;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+    width: 80%;
+    max-width: 500px;
+    background-color: var(--border-color-light);
+    border-radius: 8px;
+    margin: 0 auto 20px auto;
+    overflow: hidden;
+    padding: 3px; /* Small padding to make inner bar look inset */
+}
+.dark-theme .progress-bar-container {
+     background-color: var(--border-color-dark);
+}
+.progress-bar {
+    width: 0%;
+    height: 20px;
+    background: var(--gradient-main);
+    border-radius: 6px;
+    text-align: center;
+    color: white;
+    line-height: 20px;
+    transition: width 0.3s ease-out;
+}
+.dark-theme .progress-bar {
+    background: var(--gradient-dark);
+}
+.progress-text {
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: block;
+    color: var(--text-color-light);
+}
+
+
+/* --- Footer --- */
+.app-footer {
+    text-align: center;
+    padding: 20px;
+    background: var(--gradient-main);
+    color: white;
+    margin-top: auto; /* Pushes footer to bottom */
+}
+.dark-theme .app-footer {
+    background: var(--gradient-dark);
+}
+.app-footer p {
+    font-family: var(--font-cursive);
+    font-size: 1.5em;
+    letter-spacing: 1px;
+}
+
+/* --- Modal --- */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    animation: fadeIn 0.3s ease-out;
+}
+.modal-content {
+    position: relative;
+    background-color: var(--card-bg-light);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease-out;
+}
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+.close-button:hover,
+.close-button:focus {
+    color: var(--text-color-light);
+    text-decoration: none;
+}
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+.modal-content ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+.modal-content ul li {
+    margin-bottom: 10px;
+    padding-left: 25px;
+    position: relative;
+}
+.modal-content ul li::before {
+    content: '✓'; /* Or a nicer icon */
+    color: var(--secondary-color);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+.dark-theme .modal-content ul li::before {
+    color: var(--secondary-dark);
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+@keyframes slideIn {
+    from {transform: translateY(-50px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+/* --- Toast Notifications --- */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.toast.error {
+    background-color: #dc3545; /* Red for errors */
+}
+.dark-theme .toast {
+    background-color: var(--primary-dark);
+}
+.dark-theme .toast.error {
+    background-color: #f85149;
+}
+
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .app-header h1 {
+        font-size: 1.4em;
+    }
+    .logo-img {
+        width: 30px;
+        height: 30px;
+    }
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+    .options-grid {
+        grid-template-columns: 1fr; /* Stack options */
+    }
+    .image-preview-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    .button-primary, .button-secondary {
+        font-size: 1em;
+        padding: 10px 20px;
+    }
+    .download-button {
+        margin-left: 0;
+        margin-top: 10px; /* Stack buttons on mobile */
+        display: block;
+        width: 100%;
+    }
+    .convert-button {
+         display: block;
+         width: 100%;
+    }
+     .modal-content {
+        margin: 20% auto;
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .header-actions {
+        margin-top: 5px;
+    }
+    .upload-section p {
+        font-size: 1em;
+    }
+    .image-preview-container {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+    .app-footer p {
+        font-size: 1.2em;
+    }
+}
+
+/* Add this to ensure --primary-color-rgb is defined for box-shadow */
+body {
+    /* Define RGB versions of colors for RGBA usage */
+    --primary-color-rgb: 74, 144, 226; /* Default for light theme */
+    /* ... other RGBs if needed ... */
+}
+.dark-theme {
+    --primary-color-rgb: 88, 166, 255; /* For dark theme #58a6ff */
+}
+
+/* Theme Icon for Dark Mode Toggle */
+#themeIconMoon { display: none; } /* Initially hide moon if sun is default */
+.dark-theme #themeIconSun { display: none; }
+.dark-theme #themeIconMoon { display: inline-block; }

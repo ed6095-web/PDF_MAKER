@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4A90E2">
+    <title>Image to PDF Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" async></script> </head>
+<body class="light-theme">
+    <header class="app-header">
+        <div class="logo">
+            <img src="icons/icon-96x96.png" alt="App Logo" class="logo-img">
+            <h1>Image to PDF Pro</h1>
+        </div>
+        <div class="header-actions">
+            <button id="helpButton" class="icon-button" aria-label="Help"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg></button>
+            <button id="themeToggle" class="icon-button" aria-label="Toggle Dark Mode"><svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="uploadArea" class="upload-section card">
+            <div id="dropZone" class="drop-zone">
+                <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="64" height="64"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                <p>Drag & Drop images here, or <label for="imageUpload" class="browse-link">browse</label></p>
+                <input type="file" id="imageUpload" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                <p class="upload-limits">Max 5MB per image. Accepts JPEG, PNG, WebP.</p>
+                <label for="cameraUpload" class="camera-button button-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 6.5 12 6.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/><path d="M12 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>
+                    Use Camera
+                </label>
+                <input type="file" id="cameraUpload" accept="image/*" capture="environment" hidden>
+            </div>
+        </section>
+
+        <section class="image-preview-section">
+            <h2 class="section-title">Image Queue <span id="imageCount">(0 images)</span></h2>
+            <div id="imagePreviewContainer" class="image-preview-container">
+                <p id="noImagesText" class="empty-state">Your uploaded images will appear here. Drag to reorder.</p>
+            </div>
+        </section>
+
+        <section class="options-section card">
+            <h2 class="section-title">PDF Conversion Options</h2>
+            <div class="options-grid">
+                <div class="form-group">
+                    <label for="pageOrientation">Page Orientation:</label>
+                    <select id="pageOrientation" class="form-control">
+                        <option value="p" selected>Portrait</option>
+                        <option value="l">Landscape</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pageSize">Page Size:</label>
+                    <select id="pageSize" class="form-control">
+                        <option value="a4" selected>A4</option>
+                        <option value="letter">Letter</option>
+                        <option value="a3">A3</option>
+                        <option value="legal">Legal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="imageLayout">Layout per Page:</label>
+                    <select id="imageLayout" class="form-control">
+                        <option value="one" selected>One Image per Page (Fit)</option>
+                        <option value="grid2x2">2x2 Grid</option>
+                        <option value="grid3x3">3x3 Grid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="compressionLevel">Image Quality:</label>
+                    <select id="compressionLevel" class="form-control">
+                        <option value="FAST">Low (Faster)</option>
+                        <option value="MEDIUM" selected>Medium</option>
+                        <option value="SLOW">High (Better Quality)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="watermarkText">Watermark (Optional):</label>
+                    <input type="text" id="watermarkText" class="form-control" placeholder="e.g., Draft">
+                </div>
+                <div class="form-group">
+                    <label for="showPageNumbers">Show Page Numbers:</label>
+                    <select id="showPageNumbers" class="form-control">
+                        <option value="yes" selected>Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label for="fileName">PDF File Name:</label>
+                    <input type="text" id="fileName" class="form-control" placeholder="photos_YYYY-MM-DD_HH-MM.pdf">
+                </div>
+            </div>
+        </section>
+
+        <section class="action-section">
+            <div id="progressBarContainer" class="progress-bar-container" style="display: none;">
+                <div id="progressBar" class="progress-bar"></div>
+                <span id="progressText" class="progress-text">0%</span>
+            </div>
+            <button id="convertToPdfButton" class="button-primary convert-button" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm12 5.5h1v-3h-1v3z"/></svg>
+                Convert to PDF
+            </button>
+            <a id="downloadPdfButton" class="button-secondary download-button" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                Download PDF
+            </a>
+        </section>
+         <div id="toast" class="toast"></div>
+    </main>
+
+    <footer class="app-footer">
+        <p>BY CHITTY</p>
+    </footer>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content card">
+            <span class="close-button" id="closeHelpModal">&times;</span>
+            <h2>How to Use Image to PDF Pro</h2>
+            <ul>
+                <li><strong>Upload:</strong> Drag & drop images or click "browse". Use the camera button on mobile.</li>
+                <li><strong>Accepted Formats:</strong> JPEG, PNG, WebP. Max 5MB per image.</li>
+                <li><strong>Reorder:</strong> Drag image thumbnails in the queue to change their order.</li>
+                <li><strong>Remove:</strong> Click the '✖' on an image thumbnail to remove it.</li>
+                <li><strong>Options:</strong> Customize page size, orientation, layout, quality, watermark, and page numbers.</li>
+                <li><strong>Filename:</strong> Set a custom PDF name or use the default.</li>
+                <li><strong>Convert:</strong> Click "Convert to PDF". A progress bar will show.</li>
+                <li><strong>Download:</strong> Once ready, the download button will appear.</li>
+                <li><strong>Dark Mode:</strong> Use the moon/sun icon in the header to toggle themes.</li>
+                <li><strong>Install App:</strong> Look for an install button in your browser's address bar (on supported browsers) to use offline.</li>
+            </ul>
+        </div>
+    </div>
+
+    <canvas id="confettiCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
